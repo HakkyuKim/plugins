@@ -22,8 +22,6 @@ cirrus_task:
     - echo "-nographic" >> $CONF
     - cat $CONF
     - em-cli launch --name flutter_emulator
-
-  run_flutter_tizen_script:
     # testing to see if VM launch requires some time to be online
     - sleep 10 
     - sdb devices
