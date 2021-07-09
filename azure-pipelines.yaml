@@ -1,0 +1,12 @@
+name: self-hosted-machine-jobs
+
+jobs:
+- job: integration_test
+  pool:
+    name: Default
+    demands: agent.os -equals Linux
+  steps:
+    - bash: tools/run.sh
+      displayName: Integration tests
+      failOnStderr: 'true'
+
