@@ -1,0 +1,35 @@
+cirrus_task:
+  container:
+    dockerfile: ci/Dockerfile
+    kvm: true
+
+  check_kvm_script:
+    - apt-get update
+    - apt-get install -y cpu-checker
+    - kvm-ok
+
+  install_flutter_tizen_script:
+    - flutter-tizen doctor -v
+
+  run_headless_emulator_script:
+    - flutter-tizen emulators --create
+    - export "CONF=/home/tizen/tizen-studio-data/emulator/vms/flutter_emulator/vm_launch.conf"
+    - sed -i '/-display maru_qt/d' $CONF
+    - sed -i '/-device virtio-maru-jack-pci/d' $CONF
+    - sed -i '/-device vigs,backend=/d' $CONF
+    - sed -i '/-device yagl,wsi=/d' $CONF
+    - sed -i '/-device AC97/d' $CONF
+    - echo "-nographic" >> $CONF
+    - cat $CONF
+    - em-cli launch --name flutter_emulator
+
+  run_flutter_tizen_script:
+    # testing to see if VM launch requires some time to be online
+    - sleep 10 
+    - sdb devices
+    - flutter-tizen devices
+    - cd packages/battery_plus/example
+    - flutter-tizen pub get
+    - flutter-tizen drive --driver=test_driver/integration_test.dart --target=integration_test/battery_plus_test.dart
+
+
