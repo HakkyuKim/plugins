@@ -51,7 +51,7 @@ def parse_args(args):
     return parser.parse_args(args)
 
 
-def driveExampleTest(plugin, devices):
+def drive_example_test(plugin, devices):
     example_path = os.path.join(plugin, 'example')
     if not os.path.isdir(example_path):
         return PluginResult.skip('no example')
@@ -80,10 +80,11 @@ def driveExampleTest(plugin, devices):
     for driver_path in driver_paths:
         for test_target_path in test_target_paths:
             print(f'{indentation}running --driver {os.path.basename(driver_path)} --target {os.path.basename(test_target_path)}')
-            subprocess.run(['flutter-tizen', 'pub', 'get'], cwd=example_path)
+            subprocess.run(['flutter-tizen pub get'],
+                           shell=True, cwd=example_path)
             try:
-                completed_process = subprocess.run(['flutter-tizen', 'drive', '--driver',
-                                                driver_path, '--target', test_target_path], cwd=example_path, timeout=300)
+                completed_process = subprocess.run(
+                    [f'flutter-tizen drive --driver={driver_path} --target={test_target_path}'], shell=True, cwd=example_path, timeout=300)
                 if completed_process.returncode != 0:
                     errors.append(test_target_path)
             except subprocess.TimeoutExpired:
@@ -101,15 +102,14 @@ def main(argv):
     plugin_names = []
     if len(args.plugins) == 0 and args.run_on_changed_packages:
         base_sha = args.base_sha
-        # Why shell=True generates false?
         if base_sha == '':
             base_sha = subprocess.run(
-                ['git', 'merge-base', '--fork-point', 'FETCH_HEAD', 'HEAD'], cwd=packages_path, encoding='utf-8', stdout=subprocess.PIPE).stdout
+                ['git merge-base --fork-point FETCH_HEAD HEAD'], shell=True, cwd=packages_path, encoding='utf-8', stdout=subprocess.PIPE).stdout
             if base_sha == '':
                 process_result = subprocess.run(
-                    ['git', 'merge-base', 'FETCH_HEAD', 'HEAD'], cwd=packages_path, encoding='utf-8', stdout=subprocess.PIPE).stdout
+                    ['git merge-base FETCH_HEAD HEAD'], shell=True, cwd=packages_path, encoding='utf-8', stdout=subprocess.PIPE).stdout
         changed_files = subprocess.run(
-            ['git', 'diff', '--name-only', base_sha, 'HEAD'], cwd=packages_path, encoding='utf-8', stdout=subprocess.PIPE).stdout.split('\n')
+            [f'git diff --name-only {base_sha} HEAD'], shell=True, cwd=packages_path, encoding='utf-8', stdout=subprocess.PIPE).stdout.split('\n')
         changed_plugins = []
         for changed_file in changed_files:
             path_segments = changed_file.split('/')
@@ -118,7 +118,7 @@ def main(argv):
             index = path_segments.index('packages')
             if index < len(path_segments):
                 changed_plugins.append(path_segments[index + 1])
-        plugin_name = list(set(changed_plugins))
+        plugin_names = list(set(changed_plugins))
     else:
         for plugin_name in os.listdir(packages_path):
             plugin_path = os.path.join(packages_path, plugin_name)
@@ -136,7 +136,7 @@ def main(argv):
         test_num += 1
         print(
             f'{indentation}Testing for {plugin_name} ({test_num}/{len(plugin_names)})')
-        result = driveExampleTest(plugin_path, [])
+        result = drive_example_test(plugin_path, [])
         if result.run_state == 'skipped':
             print(f'{indentation}SKIPPING: {plugin_name}')
         results[plugin_name] = result
@@ -163,7 +163,7 @@ def main(argv):
             print(
                 f'{indentation}FAILED: {plugin_name} DETAILS: {results[failed_plugin].details}')
         return 1
-    
+
     if len(results) == 0:
         print(f'{TERM_YELLOW}No tests are run.{TERM_EMPTY}')
     else:
