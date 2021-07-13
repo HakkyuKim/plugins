@@ -1,0 +1,11 @@
+name: self-hosted-machine-jobs
+
+jobs:
+- job: integration_tests
+  pool:
+    name: Default
+    demands: agent.os -equals Linux
+  steps:
+    - bash: tools/drive_examples.py
+      displayName: Integration tests
+
