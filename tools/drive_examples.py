@@ -104,12 +104,12 @@ def main(argv):
         base_sha = args.base_sha
         if base_sha == '':
             base_sha = subprocess.run(
-                ['git merge-base --fork-point FETCH_HEAD HEAD'], shell=True, cwd=packages_path, encoding='utf-8', stdout=subprocess.PIPE).stdout
+                'git merge-base --fork-point FETCH_HEAD HEAD', shell=True, cwd=packages_path, encoding='utf-8', stdout=subprocess.PIPE).stdout
             if base_sha == '':
                 process_result = subprocess.run(
-                    ['git merge-base FETCH_HEAD HEAD'], shell=True, cwd=packages_path, encoding='utf-8', stdout=subprocess.PIPE).stdout
+                    'git merge-base FETCH_HEAD HEAD', shell=True, cwd=packages_path, encoding='utf-8', stdout=subprocess.PIPE).stdout
         changed_files = subprocess.run(
-            [f'git diff --name-only {base_sha} HEAD'], shell=True, cwd=packages_path, encoding='utf-8', stdout=subprocess.PIPE).stdout.split('\n')
+            f'git diff --name-only {base_sha} HEAD', shell=True, cwd=packages_path, encoding='utf-8', stdout=subprocess.PIPE).stdout.split('\n')
         changed_plugins = []
         for changed_file in changed_files:
             path_segments = changed_file.split('/')
