@@ -6,6 +6,6 @@ jobs:
     name: Default
     demands: agent.os -equals Linux
   steps:
-    - bash: tools/drive_examples.py
+    - bash: tools/drive_examples.py --run-on-changed-packages
       displayName: Integration tests
 
